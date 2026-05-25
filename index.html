@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>芸能人年齢当てクイズ</title>
+
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8398161859137802"
+     crossorigin="anonymous"></script>
+
+<style>
+*{box-sizing:border-box}
+body{margin:0;font-family:"Hiragino Sans","Yu Gothic",system-ui,sans-serif;background:linear-gradient(135deg,#581c87,#be185d,#f97316);color:#fff;min-height:100vh}
+header{text-align:center;padding:26px 14px}
+header h1{margin:0;font-size:30px}
+header p{opacity:.9}
+.container{max-width:760px;margin:auto;padding:16px}
+.ad{background:#fff;border-radius:16px;padding:10px;margin:12px 0 20px}
+.card{background:rgba(255,255,255,.13);border:1px solid rgba(255,255,255,.25);border-radius:24px;padding:24px;box-shadow:0 20px 60px rgba(0,0,0,.35)}
+.info{display:flex;justify-content:space-between;gap:10px;margin-bottom:18px;font-weight:bold}
+.badge{background:rgba(255,255,255,.2);padding:8px 12px;border-radius:999px}
+.question{text-align:center;font-size:24px;font-weight:900;line-height:1.6;margin:26px 0;text-shadow:0 8px 20px rgba(0,0,0,.35)}
+.name{font-size:42px;color:#fff7ed}
+.options{display:grid;grid-template-columns:1fr;gap:12px}
+button{border:none;border-radius:16px;padding:16px;font-size:17px;font-weight:bold;cursor:pointer;background:#fff;color:#111827;transition:.18s}
+button:hover{transform:translateY(-2px);background:#fed7aa}
+button.correct{background:#22c55e;color:white}
+button.wrong{background:#ef4444;color:white}
+.result{margin-top:18px;text-align:center;font-size:18px;font-weight:bold;min-height:32px}
+.explain{text-align:center;opacity:.95;min-height:26px;line-height:1.6}
+.end{text-align:center;display:none}
+.end h2{font-size:30px}
+.restart{background:#facc15}
+.progress{width:100%;height:10px;background:rgba(255,255,255,.18);border-radius:999px;overflow:hidden;margin-bottom:18px}
+.bar{height:100%;width:0%;background:linear-gradient(90deg,#facc15,#fb7185);transition:.3s}
+@media(max-width:520px){
+  .question{font-size:20px}
+  .name{font-size:34px}
+  header h1{font-size:24px}
+}
+</style>
+</head>
+
+<body>
+<header>
+  <h1>芸能人年齢当てクイズ</h1>
+  <p>この芸能人、今何歳？年齢感覚をチェック！</p>
+</header>
+
+<div class="container">
+
+  <div class="ad">
+    <!-- UIゲーム -->
+    <ins class="adsbygoogle"
+         style="display:block"
+         data-ad-client="ca-pub-8398161859137802"
+         data-ad-slot="6325875393"
+         data-ad-format="auto"
+         data-full-width-responsive="true"></ins>
+    <script>
+         (adsbygoogle = window.adsbygoogle || []).push({});
+    </script>
+  </div>
+
+  <div class="card" id="quizBox">
+    <div class="info">
+      <div class="badge" id="count">1 / 20</div>
+      <div class="badge" id="score">正解 0</div>
+    </div>
+
+    <div class="progress">
+      <div class="bar" id="bar"></div>
+    </div>
+
+    <div class="question">
+      <div>この人の現在の年齢は？</div>
+      <div class="name" id="person">綾瀬はるか</div>
+    </div>
+
+    <div class="options" id="options"></div>
+
+    <div class="result" id="result"></div>
+    <div class="explain" id="explain"></div>
+  </div>
+
+  <div class="card end" id="endBox">
+    <h2>結果発表</h2>
+    <p id="finalScore"></p>
+    <p id="rank"></p>
+    <button class="restart" onclick="restartQuiz()">もう一度挑戦する</button>
+  </div>
+</div>
+
+<script>
+const people = [
+  {name:"綾瀬はるか", birth:"1985-03-24", hint:"女優"},
+  {name:"新垣結衣", birth:"1988-06-11", hint:"女優"},
+  {name:"石原さとみ", birth:"1986-12-24", hint:"女優"},
+  {name:"北川景子", birth:"1986-08-22", hint:"女優"},
+  {name:"有村架純", birth:"1993-02-13", hint:"女優"},
+  {name:"広瀬すず", birth:"1998-06-19", hint:"女優"},
+  {name:"橋本環奈", birth:"1999-02-03", hint:"女優"},
+  {name:"浜辺美波", birth:"2000-08-29", hint:"女優"},
+  {name:"永野芽郁", birth:"1999-09-24", hint:"女優"},
+  {name:"今田美桜", birth:"1997-03-05", hint:"女優"},
+  {name:"菅田将暉", birth:"1993-02-21", hint:"俳優"},
+  {name:"山﨑賢人", birth:"1994-09-07", hint:"俳優"},
+  {name:"佐藤健", birth:"1989-03-21", hint:"俳優"},
+  {name:"神木隆之介", birth:"1993-05-19", hint:"俳優"},
+  {name:"吉沢亮", birth:"1994-02-01", hint:"俳優"},
+  {name:"横浜流星", birth:"1996-09-16", hint:"俳優"},
+  {name:"松坂桃李", birth:"1988-10-17", hint:"俳優"},
+  {name:"星野源", birth:"1981-01-28", hint:"歌手・俳優"},
+  {name:"福山雅治", birth:"1969-02-06", hint:"歌手・俳優"},
+  {name:"木村拓哉", birth:"1972-11-13", hint:"俳優・歌手"},
+  {name:"中居正広", birth:"1972-08-18", hint:"タレント"},
+  {name:"櫻井翔", birth:"1982-01-25", hint:"タレント・俳優"},
+  {name:"二宮和也", birth:"1983-06-17", hint:"俳優・タレント"},
+  {name:"松本潤", birth:"1983-08-30", hint:"俳優・タレント"},
+  {name:"大泉洋", birth:"1973-04-03", hint:"俳優・タレント"},
+  {name:"ムロツヨシ", birth:"1976-01-23", hint:"俳優"},
+  {name:"小栗旬", birth:"1982-12-26", hint:"俳優"},
+  {name:"阿部寛", birth:"1964-06-22", hint:"俳優"},
+  {name:"長澤まさみ", birth:"1987-06-03", hint:"女優"},
+  {name:"深田恭子", birth:"1982-11-02", hint:"女優"}
+];
+
+let quiz = [];
+let current = 0;
+let score = 0;
+const total = 20;
+
+function getAge(birthDate){
+  const today = new Date();
+  const birth = new Date(birthDate);
+  let age = today.getFullYear() - birth.getFullYear();
+  const m = today.getMonth() - birth.getMonth();
+  if(m < 0 || (m === 0 && today.getDate() < birth.getDate())){
+    age--;
+  }
+  return age;
+}
+
+function shuffle(array){
+  return array.sort(() => Math.random() - 0.5);
+}
+
+function makeOptions(correctAge){
+  const set = new Set([correctAge]);
+  while(set.size < 4){
+    const diff = Math.floor(Math.random() * 9) - 4;
+    const val = correctAge + diff;
+    if(val > 15 && val !== correctAge) set.add(val);
+  }
+  return shuffle([...set]).map(age => `${age}歳`);
+}
+
+function startQuiz(){
+  quiz = shuffle([...people]).slice(0,total);
+  current = 0;
+  score = 0;
+  document.getElementById("quizBox").style.display = "block";
+  document.getElementById("endBox").style.display = "none";
+  showQuestion();
+}
+
+function showQuestion(){
+  const q = quiz[current];
+  const age = getAge(q.birth);
+
+  document.getElementById("count").textContent = `${current + 1} / ${total}`;
+  document.getElementById("score").textContent = `正解 ${score}`;
+  document.getElementById("person").textContent = q.name;
+  document.getElementById("result").textContent = "";
+  document.getElementById("explain").textContent = `${q.hint}｜年齢を予想してね`;
+  document.getElementById("bar").style.width = `${(current / total) * 100}%`;
+
+  const optionsBox = document.getElementById("options");
+  optionsBox.innerHTML = "";
+
+  makeOptions(age).forEach(option => {
+    const btn = document.createElement("button");
+    btn.textContent = option;
+    btn.onclick = () => checkAnswer(btn, option, age);
+    optionsBox.appendChild(btn);
+  });
+}
+
+function checkAnswer(btn, selected, correctAge){
+  const q = quiz[current];
+  const buttons = document.querySelectorAll("#options button");
+  const correctText = `${correctAge}歳`;
+
+  buttons.forEach(b => {
+    b.disabled = true;
+    if(b.textContent === correctText) b.classList.add("correct");
+  });
+
+  if(selected === correctText){
+    score++;
+    document.getElementById("result").textContent = "正解！";
+  }else{
+    btn.classList.add("wrong");
+    document.getElementById("result").textContent = `不正解… 正解は「${correctText}」`;
+  }
+
+  document.getElementById("explain").textContent = `${q.name}さんは ${q.birth.replaceAll("-","/")} 生まれです。`;
+  document.getElementById("score").textContent = `正解 ${score}`;
+
+  setTimeout(() => {
+    current++;
+    if(current < total){
+      showQuestion();
+    }else{
+      showResult();
+    }
+  }, 1300);
+}
+
+function showResult(){
+  document.getElementById("quizBox").style.display = "none";
+  document.getElementById("endBox").style.display = "block";
+
+  document.getElementById("finalScore").textContent = `${total}問中 ${score}問 正解！`;
+
+  let rank = "";
+  if(score >= 18) rank = "芸能ニュース博士級！年齢感覚がかなり鋭いです。";
+  else if(score >= 14) rank = "かなり詳しい！テレビ・ドラマ好きレベル。";
+  else if(score >= 9) rank = "普通レベル！有名人の世代感覚はそこそこあります。";
+  else rank = "まだまだ伸びしろあり！もう一度挑戦して覚えよう。";
+
+  document.getElementById("rank").textContent = rank;
+}
+
+function restartQuiz(){
+  startQuiz();
+}
+
+startQuiz();
+</script>
+</body>
+</html>
